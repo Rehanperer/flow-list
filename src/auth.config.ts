@@ -1,6 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { LoginSchema } from "@/lib/schemas";
 
 export default {
     providers: [
@@ -18,21 +17,27 @@ export default {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
+            const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
             const isPublicRoute = ["/", "/login", "/register"].includes(nextUrl.pathname);
 
-            if (isPublicRoute && isLoggedIn) {
-                return false; // Force redirect if already logged in on a public page
+            if (isApiAuthRoute) return true;
+
+            if (isPublicRoute) {
+                if (isLoggedIn) {
+                    return Response.redirect(new URL("/dashboard", nextUrl));
+                }
+                return true;
             }
 
-            return true; // Let middleware handle complex redirects
+            return isLoggedIn;
         },
-        async session({ session, token }) {
+        async session({ session, token }: any) {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
             }
             return session;
         },
-        async jwt({ token }) {
+        async jwt({ token }: any) {
             return token;
         }
     }
