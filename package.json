@@ -1,0 +1,14 @@
+{
+  "name": "flowlist-ai",
+  "private": true,
+  "workspaces": [
+    "client",
+    "api"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=client",
+    "build": "npm run build --workspace=client",
+    "lint": "npm run lint --workspace=client",
+    "preview": "npm run preview --workspace=client"
+  }
+}
