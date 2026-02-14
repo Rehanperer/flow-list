@@ -1,19 +1,10 @@
 import type { NextAuthConfig } from "next-auth";
-import Credentials from "next-auth/providers/credentials";
 
 export default {
-    providers: [
-        Credentials({
-            async authorize(credentials) {
-                // Validation logic is in auth.ts
-                return null;
-            },
-        }),
-    ],
+    providers: [],
     pages: {
         signIn: "/login",
     },
-    secret: process.env.AUTH_SECRET,
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;

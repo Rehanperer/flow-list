@@ -12,9 +12,9 @@ export const {
     signIn,
     signOut,
 } = NextAuth({
+    ...authConfig,
     adapter: PrismaAdapter(db),
     session: { strategy: "jwt" },
-    ...authConfig,
     providers: [
         Credentials({
             async authorize(credentials) {
