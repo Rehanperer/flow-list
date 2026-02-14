@@ -14,22 +14,17 @@ export default {
     pages: {
         signIn: "/login",
     },
+    secret: process.env.AUTH_SECRET,
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isApiAuthRoute = nextUrl.pathname.startsWith("/api/auth");
             const isPublicRoute = ["/", "/login", "/register"].includes(nextUrl.pathname);
 
-            if (isApiAuthRoute) return true;
-
-            if (isPublicRoute) {
-                if (isLoggedIn) {
-                    return Response.redirect(new URL("/dashboard", nextUrl));
-                }
-                return true;
+            if (isPublicRoute && isLoggedIn) {
+                return false; // Force redirect if already logged in on a public page
             }
 
-            return isLoggedIn;
+            return true; // Let middleware handle complex redirects
         },
         async session({ session, token }) {
             if (token.sub && session.user) {
