@@ -12,6 +12,7 @@ import {
     LogOut,
     Calendar,
     BarChart,
+    Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
@@ -41,6 +42,12 @@ const routes = [
         icon: Calendar,
         href: "/calendar",
         color: "text-orange-500",
+    },
+    {
+        label: "Wealth",
+        icon: Wallet,
+        href: "/finance",
+        color: "text-emerald-600",
     },
     {
         label: "Analytics",

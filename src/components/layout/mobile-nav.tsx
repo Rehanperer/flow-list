@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { LayoutDashboard, CheckSquare, Repeat, Zap, Calendar, BarChart } from "lucide-react";
+import { LayoutDashboard, CheckSquare, Repeat, Zap, Calendar, BarChart, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
@@ -11,6 +11,7 @@ const items = [
     { icon: CheckSquare, href: "/tasks", label: "Tasks" },
     { icon: Calendar, href: "/calendar", label: "Plan" },
     { icon: BarChart, href: "/analytics", label: "Insights" },
+    { icon: Wallet, href: "/finance", label: "Wealth" },
     { icon: Repeat, href: "/habits", label: "Habits" },
     { icon: Zap, href: "/focus", label: "AI" },
 ];

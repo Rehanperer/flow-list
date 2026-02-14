@@ -2,6 +2,7 @@
 
 import { createTask, getTasks } from "./task-actions";
 import { createHabit } from "./habit-actions";
+import { addTransaction, getBalanceStatus } from "./finance-actions";
 import OpenAI from "openai";
 import { auth } from "@/auth";
 
@@ -72,7 +73,7 @@ export async function chatWithAI(messages: { role: "user" | "assistant"; content
 
     try {
         let currentMessages = [
-            { role: "system", content: "You are FlowList AI, a helpful productivity assistant. You can create tasks, habits, and retrieve the user's task list to help them plan a schedule. If you use a tool, explain what you did. For scheduling, fetch the tasks first, then suggest a time-blocked plan based on priorities." },
+            { role: "system", content: "You are FlowList AI, a helpful productivity and financial assistant. You can manage tasks, habits, and now FINANCES. You can record income/expenses and provide financial summaries. If you use a tool, explain what you did. For scheduling, fetch the tasks first. For finance, always confirm the recorded amount and category." },
             ...messages as any
         ];
 
@@ -101,6 +102,10 @@ export async function chatWithAI(messages: { role: "user" | "assistant"; content
                 } else if (functionName === "get_pending_tasks") {
                     const tasks = await getTasks();
                     result = { tasks: tasks.filter(t => t.status === "TODO") };
+                } else if (functionName === "add_transaction") {
+                    result = await addTransaction(args);
+                } else if (functionName === "get_financial_status") {
+                    result = await getBalanceStatus();
                 }
 
                 toolResults.push({

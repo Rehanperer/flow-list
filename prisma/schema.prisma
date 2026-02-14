@@ -30,8 +30,11 @@ model User {
   focusSessions FocusSession[]
   aiChats       AIInteraction[]
   
-  // NextAuth required (if using adapter fully, though Credentials provider skips some)
   accounts      Account[]
+  transactions  Transaction[]
+  budgets       Budget[]
+  subscriptions Subscription[]
+  savingsGoals  SavingsGoal[]
 }
 
 model Account {
@@ -139,6 +142,66 @@ model AIInteraction {
   role      String   // user, assistant
   content   String   @db.Text
   createdAt DateTime @default(now())
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum RecurrenceInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+model Transaction {
+  id            String          @id @default(cuid())
+  userId        String
+  amount        Float
+  type          TransactionType
+  category      String
+  description   String?
+  date          DateTime        @default(now())
+  paymentMethod String?         // Cash, Card, etc.
+  isRecurring   Boolean         @default(false)
+  recurrenceId  String?
+  
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Budget {
+  id          String   @id @default(cuid())
+  userId      String
+  category    String
+  limit       Float
+  month       Int
+  year        Int
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Subscription {
+  id          String             @id @default(cuid())
+  userId      String
+  name        String
+  amount      Float
+  interval    RecurrenceInterval
+  nextBilling DateTime
+  status      String             @default("ACTIVE")
+  
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SavingsGoal {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  target      Float
+  current     Float    @default(0)
+  deadline    DateTime?
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
