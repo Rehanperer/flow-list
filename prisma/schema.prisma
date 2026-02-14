@@ -30,11 +30,14 @@ model User {
   focusSessions FocusSession[]
   aiChats       AIInteraction[]
   
-  accounts      Account[]
-  transactions  Transaction[]
-  budgets       Budget[]
-  subscriptions Subscription[]
-  savingsGoals  SavingsGoal[]
+  accounts         Account[]
+  financialAccounts FinancialAccount[]
+  transactions     Transaction[]
+  budgets          Budget[]
+  subscriptions    Subscription[]
+  savingsGoals     SavingsGoal[]
+  assets           Asset[]
+  liabilities      Liability[]
 }
 
 model Account {
@@ -157,19 +160,61 @@ enum RecurrenceInterval {
   YEARLY
 }
 
+model FinancialAccount {
+  id            String          @id @default(cuid())
+  userId        String
+  name          String
+  type          String          // BANK, CASH, CREDIT, INVESTMENT
+  balance       Float           @default(0)
+  currency      String          @default("USD")
+  
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  assets        Asset[]
+  liabilities   Liability[]
+}
+
 model Transaction {
   id            String          @id @default(cuid())
   userId        String
+  accountId     String?
   amount        Float
   type          TransactionType
   category      String
   description   String?
+  tags          String[]        // Array of tags
   date          DateTime        @default(now())
   paymentMethod String?         // Cash, Card, etc.
   isRecurring   Boolean         @default(false)
   recurrenceId  String?
   
   user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       FinancialAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+}
+
+model Asset {
+  id            String          @id @default(cuid())
+  userId        String
+  accountId     String?
+  name          String
+  value         Float
+  type          String          // REAL_ESTATE, VEHICLE, STOCK, etc.
+  
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       FinancialAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+}
+
+model Liability {
+  id            String          @id @default(cuid())
+  userId        String
+  accountId     String?
+  name          String
+  amount        Float
+  type          String          // LOAN, DEBT, MORTGAGE, etc.
+  dueDate       DateTime?
+  
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account       FinancialAccount? @relation(fields: [accountId], references: [id], onDelete: SetNull)
 }
 
 model Budget {
