@@ -1,6 +1,27 @@
-@tailwind base;
-@tailwind components;
 @tailwind utilities;
+
+@layer base {
+
+  html,
+  body {
+    @apply h-full overflow-hidden;
+    /* Prevent overscroll bounce on body */
+    overscroll-behavior-y: none;
+    /* Disable text selection by default for a native app feel, except in inputs */
+    user-select: none;
+    -webkit-user-select: none;
+    /* Optimize for touch */
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+}
 
 @layer base {
   :root {
@@ -70,6 +91,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
