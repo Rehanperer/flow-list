@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  role          UserRole  @default(USER)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tasks         Task[]
+  habits        Habit[]
+  focusSessions FocusSession[]
+  aiChats       AIInteraction[]
+  
+  // NextAuth required (if using adapter fully, though Credentials provider skips some)
+  accounts      Account[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  status      TaskStatus @default(TODO)
+  priority    Priority   @default(MEDIUM)
+  dueDate     DateTime?
+  duration    Int?       // Estimated duration in minutes
+  
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  recurrenceRule   RecurrenceRule?
+  focusSessions    FocusSession[]
+}
+
+model RecurrenceRule {
+  id          String   @id @default(cuid())
+  taskId      String   @unique
+  type        String   // DAILY, WEEKLY, MONTHLY, CUSTOM
+  interval    Int      @default(1)
+  daysOfWeek  Int[]    // 0=Sun, 1=Mon...
+  endCondition String? // Date or Count
+  
+  task        Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+model Habit {
+  id            String     @id @default(cuid())
+  userId        String
+  title         String
+  frequency     String     // DAILY, WEEKLY
+  streakCurrent Int        @default(0)
+  streakBest    Int        @default(0)
+  
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs          HabitLog[]
+}
+
+model HabitLog {
+  id          String   @id @default(cuid())
+  habitId     String
+  completedAt DateTime @default(now())
+  
+  habit       Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+}
+
+model FocusSession {
+  id        String   @id @default(cuid())
+  userId    String
+  taskId    String?
+  startTime DateTime
+  endTime   DateTime?
+  duration  Int?     // Actual duration in seconds
+  status    String?  // COMPLETED, ABANDONED
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task      Task?    @relation(fields: [taskId], references: [id])
+}
+
+model AIInteraction {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String   // user, assistant
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
